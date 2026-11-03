@@ -1,6 +1,6 @@
 package hospital.sync;
 
-class Semaphore {
+public class Semaphore {
 
     private int permits;
 
