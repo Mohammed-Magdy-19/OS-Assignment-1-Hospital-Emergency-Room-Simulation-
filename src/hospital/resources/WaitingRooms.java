@@ -1,41 +1,83 @@
 package hospital.resources;
 
+import hospital.Actors.Patient;
 import hospital.sync.Semaphore;
 import hospital.util.Logger;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class WaitingRooms {
-    private final Semaphore seatsSemaphore;
     private final int capacity;
-    private int currentOccupancy = 0;
-    private final Object lock = new Object();
+    private final Queue<Patient> queue = new LinkedList<>();
+
+    private final Semaphore empty;                      
+    private final Semaphore full  = new Semaphore(0);   
+    private final Semaphore mutex = new Semaphore(1);   
 
     public WaitingRooms(int capacity) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("capacity must be >= 1");
+        }
         this.capacity = capacity;
-        this.seatsSemaphore = new Semaphore(capacity);
+        this.empty = new Semaphore(capacity);
     }
 
-    public void enterWaitingRoom(String patientName) throws InterruptedException {
-        synchronized (lock) {
-            if (currentOccupancy >= capacity) {
-                Logger.log("The waiting room is full.");
-                Logger.log(patientName + " is waiting outside for an available seat.");
+    public void enterWaitingRoom(Patient patient) throws InterruptedException {
+        if (!empty.tryAcquire(0)) {
+            Logger.log("The waiting room is full.",
+                       patient.getPatientName() + " is waiting outside for an available seat.");
+            empty.acquire();
+        }
+
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            empty.release();   
+            throw e;
+        }
+
+        try {
+            queue.add(patient);
+            Logger.log(patient.getPatientName() + " entered the waiting room.");
+        } finally {
+            mutex.release();
+        }
+
+        full.release();
+    }
+
+    public Patient takePatient(int doctorId) throws InterruptedException {
+        full.acquire();
+
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            full.release();   
+            throw e;
+        }
+
+        Patient patient;
+        try {
+            patient = queue.poll();
+            if (patient != null) {
+                Logger.log("Doctor " + doctorId + " is assigned to " + patient.getPatientName() + ".");
             }
+        } finally {
+            mutex.release();
         }
 
-        seatsSemaphore.acquire();
-
-        synchronized (lock) {
-            currentOccupancy++;
+        if (patient == null) {
+            return null;      
         }
 
-        Logger.log(patientName + " entered the waiting room.");
+        empty.release();       
+        return patient;
     }
 
-    public void leaveWaitingRoom() {
-        synchronized (lock) {
-            currentOccupancy--;
+    public void close(int numberOfDoctors) {
+        for (int i = 0; i < numberOfDoctors; i++) {
+            full.release();
         }
-        seatsSemaphore.release(); 
     }
 
     public int getCapacity() {

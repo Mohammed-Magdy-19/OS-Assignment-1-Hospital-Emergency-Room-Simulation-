@@ -4,23 +4,21 @@ import hospital.sync.Semaphore;
 import hospital.util.Logger;
 
 public class TreatmentRooms {
-    private final Semaphore roomsSemaphore;
-    private final int totalRooms;
+    private static final int TOTAL_ROOMS = 2;
+    private static final long TIMEOUT_MS = 3000;
 
-    public TreatmentRooms(int totalRooms) {
-        this.totalRooms = totalRooms;
-        this.roomsSemaphore = new Semaphore(totalRooms);
+    private final Semaphore roomsSemaphore = new Semaphore(TOTAL_ROOMS);
+
+    public boolean acquireRoom() throws InterruptedException {
+        return roomsSemaphore.tryAcquire(TIMEOUT_MS);
     }
 
-    public boolean acquireRoom(long timeoutMs) throws InterruptedException {
-        return roomsSemaphore.tryAcquire(timeoutMs);
-    }
-
-    public void releaseRoom() {
+    public void releaseRoom(int doctorId) {
+        Logger.log("Doctor " + doctorId + " released the treatment room.");
         roomsSemaphore.release();
     }
 
     public int getTotalRooms() {
-        return totalRooms;
+        return TOTAL_ROOMS;
     }
 }

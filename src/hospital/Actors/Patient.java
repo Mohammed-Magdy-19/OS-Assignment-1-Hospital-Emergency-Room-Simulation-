@@ -1,46 +1,40 @@
 package hospital.Actors;
 
 import hospital.resources.WaitingRooms;
+import hospital.sync.Semaphore;
 import hospital.util.Logger;
 
 public class Patient extends Thread {
-    private final String patientName;
     private final WaitingRooms waitingRooms;
-    private boolean treated = false;
+    private final Semaphore treatedSignal = new Semaphore(0);
 
     public Patient(String name, WaitingRooms waitingRooms) {
-        super(name);
-        this.patientName = name;
+        super(name);             
         this.waitingRooms = waitingRooms;
     }
 
     @Override
     public void run() {
         try {
-            Logger.log(patientName + " arrived.");
+            Logger.log(getPatientName() + " arrived.");
 
-            waitingRooms.enterWaitingRoom(patientName);
+            waitingRooms.enterWaitingRoom(this);   
 
-            synchronized (this) {
-                while (!treated) {
-                    wait();
-                }
-            }
+            treatedSignal.acquire();               
 
-            Logger.log(patientName + " left.");
+            Logger.log(getPatientName() + " left.");
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Logger.log(patientName + " was interrupted.");
+            Logger.log(getPatientName() + " was interrupted.");
         }
     }
 
-    public synchronized void setTreated() {
-        this.treated = true;
-        notify();
+    public void setTreated() {
+        treatedSignal.release();
     }
 
     public String getPatientName() {
-        return patientName;
+        return getName();
     }
 }

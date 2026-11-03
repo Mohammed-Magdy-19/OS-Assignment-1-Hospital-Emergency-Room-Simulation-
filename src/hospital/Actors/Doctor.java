@@ -1,6 +1,6 @@
 package hospital.Actors;
-import hospital.resources.WaitingRooms;
 import hospital.resources.TreatmentRooms;
+import hospital.resources.WaitingRooms;
 import hospital.util.Logger;
 
 public class Doctor extends Thread {
@@ -28,11 +28,10 @@ public class Doctor extends Thread {
                     break;
                 }
 
-                Logger.log("Doctor " + doctorId + " is assigned to "+ patient.getPatientName() + ".");
 
                 Logger.log("Doctor " + doctorId + " is trying to acquire a treatment room.");
 
-                boolean acquired = treatmentRooms.acquireRoom(3000);
+                boolean acquired = treatmentRooms.acquireRoom();
 
                 if (!acquired) {
 
@@ -59,7 +58,7 @@ public class Doctor extends Thread {
                     Logger.log("Doctor " + doctorId + " finished treating "+ patient.getPatientName() + ".");
 
                 } finally {
-                    treatmentRooms.releaseRoom();
+                    treatmentRooms.releaseRoom(doctorId);
                 }
 
                 patient.setTreated();
