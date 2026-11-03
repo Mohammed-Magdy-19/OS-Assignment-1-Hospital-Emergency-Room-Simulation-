@@ -1,4 +1,4 @@
-package hospital.models;
+package hospital.Actors;
 
 import hospital.resources.WaitingRooms;
 import hospital.util.Logger;
