@@ -19,7 +19,7 @@ public class Doctor extends Thread {
     public void run() {
 
         try {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
 
                 Patient patient = waitingRooms.takePatient(doctorId);
 
@@ -37,7 +37,7 @@ public class Doctor extends Thread {
 
                     Logger.log("Doctor " + doctorId + " is now available.");
 
-                    continue;
+                    
                 }
 
                 Logger.log("Doctor " + doctorId + " acquired a treatment room.");
