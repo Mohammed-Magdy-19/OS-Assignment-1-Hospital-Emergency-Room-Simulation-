@@ -1,4 +1,5 @@
 package hospital.Actors;
+
 import hospital.resources.TreatmentRooms;
 import hospital.resources.WaitingRooms;
 import hospital.util.Logger;
@@ -18,20 +19,21 @@ public class Doctor extends Thread {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-
                 Patient patient = waitingRooms.takePatient(doctorId);
+                if (patient == null) {
+                    Logger.log("Doctor " + doctorId + " is stopping.");
+                    break;
+                }
 
                 Logger.log("Doctor " + doctorId + " is trying to acquire a treatment room.");
-
                 boolean acquired = treatmentRooms.acquireRoom();
 
                 if (!acquired) {
                     Logger.log("Doctor " + doctorId + " could not acquire a treatment room.");
                     Logger.log("Doctor " + doctorId + " is sending " + patient.getPatientName() + " back to the waiting room.");
-
                     waitingRooms.enterWaitingRoom(patient);
                     Logger.log("Doctor " + doctorId + " is now available.");
-
+                    continue;
                 }
 
                 Logger.log("Doctor " + doctorId + " acquired a treatment room.");
@@ -41,17 +43,14 @@ public class Doctor extends Thread {
                     int treatmentTime = 1000 + (int) (Math.random() * 4000);
                     Thread.sleep(treatmentTime);
                     Logger.log("Doctor " + doctorId + " finished treating " + patient.getPatientName() + ".");
-
-                } 
-                finally {
+                } finally {
                     treatmentRooms.releaseRoom(doctorId);
                 }
+
                 patient.setTreated();
                 Logger.log("Doctor " + doctorId + " is now available.");
             }
-
-        } 
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             Logger.log("Doctor " + doctorId + " was interrupted.");
         }
