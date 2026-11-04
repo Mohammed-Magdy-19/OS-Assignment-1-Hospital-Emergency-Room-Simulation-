@@ -4,7 +4,6 @@ import hospital.resources.WaitingRooms;
 import hospital.util.Logger;
 
 public class Doctor extends Thread {
-
     private final int doctorId;
     private final WaitingRooms waitingRooms;
     private final TreatmentRooms treatmentRooms;
@@ -17,7 +16,6 @@ public class Doctor extends Thread {
 
     @Override
     public void run() {
-
         try {
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -28,43 +26,33 @@ public class Doctor extends Thread {
                 boolean acquired = treatmentRooms.acquireRoom();
 
                 if (!acquired) {
-
                     Logger.log("Doctor " + doctorId + " could not acquire a treatment room.");
-
                     Logger.log("Doctor " + doctorId + " is sending " + patient.getPatientName() + " back to the waiting room.");
 
                     waitingRooms.enterWaitingRoom(patient);
-
                     Logger.log("Doctor " + doctorId + " is now available.");
 
-                    
                 }
 
                 Logger.log("Doctor " + doctorId + " acquired a treatment room.");
-
                 Logger.log("Doctor " + doctorId + " begins treating " + patient.getPatientName() + ".");
 
                 try {
                     int treatmentTime = 1000 + (int) (Math.random() * 4000);
-
                     Thread.sleep(treatmentTime);
-
                     Logger.log("Doctor " + doctorId + " finished treating " + patient.getPatientName() + ".");
 
                 } 
                 finally {
                     treatmentRooms.releaseRoom(doctorId);
                 }
-
                 patient.setTreated();
-
                 Logger.log("Doctor " + doctorId + " is now available.");
             }
 
-        } catch (InterruptedException e) {
-
+        } 
+        catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-
             Logger.log("Doctor " + doctorId + " was interrupted.");
         }
     }
