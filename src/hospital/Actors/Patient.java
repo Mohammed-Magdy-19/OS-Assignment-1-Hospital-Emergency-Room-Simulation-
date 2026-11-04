@@ -14,10 +14,6 @@ public class Patient extends Thread {
         this.waitingRooms = waitingRooms;
     }
 
-    public void sentBack()
-    {
-        treatedSignal.release();
-    }
     @Override
     public void run() {
         try {
