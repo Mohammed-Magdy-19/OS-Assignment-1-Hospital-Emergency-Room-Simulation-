@@ -7,20 +7,26 @@ import hospital.util.Logger;
 public class Patient extends Thread {
     private final WaitingRooms waitingRooms;
     private final Semaphore treatedSignal = new Semaphore(0);
+    private volatile boolean treated = false;
 
     public Patient(String name, WaitingRooms waitingRooms) {
         super(name);             
         this.waitingRooms = waitingRooms;
     }
 
+    public void sentBack()
+    {
+        treatedSignal.release();
+    }
     @Override
     public void run() {
         try {
             Logger.log(getPatientName() + " arrived.");
 
-            waitingRooms.enterWaitingRoom(this);   
-
-            treatedSignal.acquire();               
+            while (!treated) {
+                waitingRooms.enterWaitingRoom(this);   
+                treatedSignal.acquire();               
+            }
 
             Logger.log(getPatientName() + " left.");
 
@@ -31,6 +37,7 @@ public class Patient extends Thread {
     }
 
     public void setTreated() {
+        treated = true;
         treatedSignal.release();
     }
 
