@@ -91,10 +91,10 @@ Full table: `tests/test_results.md`.
 
 ## Team
 
-| Member | Files |
-|---|---|
-| Mohamed Magdy | Semaphore.java, Logger.java |
-| Mohamed Atef | WaitingRooms.java |
-| Adham Megahed | Doctor.java |
-| Arwa Atef | TreatmentRooms.java, Patient.java |
-| Mahmoud Khaled | Hospital.java, README.md, test runs |
+| Member |ID| Files |
+|---|---|---|
+| Mohamed Magdy| 20240524 | Semaphore.java, Logger.java |
+| Mohamed Atef | 20240809 | WaitingRooms.java |
+| Adham Megahed | 20240072 | Doctor.java |
+| Arwa Atef | 20240808 | TreatmentRooms.java, Patient.java |
+| Mahmoud Khaled | 20240550 | Hospital.java, README.md, test runs |
