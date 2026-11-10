@@ -45,9 +45,9 @@ public class Doctor extends Thread {
                     Logger.log("Doctor " + doctorId + " finished treating " + patient.getPatientName() + ".");
                 } finally {
                     treatmentRooms.releaseRoom(doctorId);
+                    patient.setTreated();
                 }
-
-                patient.setTreated();
+                
                 Logger.log("Doctor " + doctorId + " is now available.");
             }
         } catch (InterruptedException e) {
